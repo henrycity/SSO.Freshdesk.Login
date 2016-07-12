@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
+using System.Security.Authentication;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using NPS.SSO.Freshdesk.Login.Models;
 
 namespace NPS.SSO.Freshdesk.Login.Controllers
 {
@@ -13,47 +16,7 @@ namespace NPS.SSO.Freshdesk.Login.Controllers
         [Authorize]
         public ActionResult Index()
         {
-            var baseUrl = "https://letsgocena.freshdesk.com";
-            var user = ClaimsPrincipal.Current;
-            var name = user.FindFirst("name").Value;
-            var email = user.FindFirst("email").Value;
-            var secret = "d3dc809dc6c5231897a1b8b9ee4c108c";
-            var path = GetSsoUrl(baseUrl, secret, name, email);
-            return Redirect(path);
-        }
-
-        private string GetSsoUrl(string baseUrl, string secret, string name, string email)
-        {
-            var timems = DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds.ToString();
-            var hash = GetHash(secret, name, email, timems);
-            var path = $@"{baseUrl}/login/sso?name={Server.UrlEncode(name)
-                          }&email={Server.UrlEncode(email)
-                          }&timestamp={timems
-                          }&hash={hash}";
-            return path;
-        }
-
-        private string GetHash(string secret, string name, string email, string timems)
-        {
-            var input = GetUserInformation();
-            var keybytes = Encoding.UTF8.GetBytes(secret);
-            var inputBytes = Encoding.UTF8.GetBytes(input);
-            var crypto = new HMACMD5(keybytes);
-            var hash = crypto.ComputeHash(inputBytes);
-            return hash.Select(b => b.ToString("x2"))
-                .Aggregate(new StringBuilder(),
-                    (current, next) => current.Append(next),
-                    current => current.ToString());
-        }
-
-        private string GetUserInformation()
-        {
-            var user = ClaimsPrincipal.Current;
-            var name = user.FindFirst("name").Value;
-            var email = user.FindFirst("email").Value;
-            var secret = "d3dc809dc6c5231897a1b8b9ee4c108c";
-            var input = user + name + email + secret;
-            return input;
+            return View();
         }
 
         [Authorize]
@@ -69,6 +32,63 @@ namespace NPS.SSO.Freshdesk.Login.Controllers
             return View();
         }
 
+        [Authorize]
+        public ActionResult Freshdesk()
+        {
+//            logger.info("redirecting to sso url");
+            try
+            {
+                return Redirect(GetFreshdeskSsoUrl());
+            }
+            catch (InvalidCredentialException ex)
+            {
+//                logger.Error("failed");
+                throw;
+            }
+        }
+
+        private string GetFreshdeskSsoUrl()
+        {
+//            var logger = "asas";
+            var baseUrl = "https://letsgocena.freshdesk.com";    // Change this to our own Freshdesk portal
+            var currentUser = ClaimsPrincipal.Current;
+            if (currentUser == null)
+            {
+                throw new InvalidCredentialException();
+            }
+            var name = GetUserInfo(currentUser, "name");
+            var email = GetUserInfo(currentUser, "email");
+            var phone = GetUserInfo(currentUser, "phone_number");
+            var company = GetUserInfo(currentUser, "companyid");
+            var timems = TimeProvider.Current.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds.ToString();
+            var secret = "d3dc809dc6c5231897a1b8b9ee4c108c";   // Change this to our portal secret key
+            var hash = GetHash(secret, name, email, timems);
+            var path = $@"{baseUrl}/login/sso?name={HttpUtility.UrlEncode(name)
+                          }&email={HttpUtility.UrlEncode(email)
+                          }&timestamp={timems
+                          }&phone={HttpUtility.UrlEncode(phone)
+                          }&company={HttpUtility.UrlEncode(company)
+                          }&hash={hash}";
+            return path;
+        }
+
+        private string GetUserInfo(ClaimsPrincipal user, string info)
+        {
+            return user.FindFirst(info) != null ? user.FindFirst(info).Value : "";
+        }
+
+        private string GetHash(string secret, string name, string email, string timems)
+        {
+            var input = name + secret + email + timems;
+            var keybytes = Encoding.UTF8.GetBytes(secret);
+            var inputBytes = Encoding.UTF8.GetBytes(input);
+            var crypto = new HMACMD5(keybytes);
+            var hash = crypto.ComputeHash(inputBytes);
+            return hash.Select(b => b.ToString("x2"))
+                .Aggregate(new StringBuilder(),
+                    (current, next) => current.Append(next),
+                    current => current.ToString());
+        }
 
         public ActionResult Signout()
         {
