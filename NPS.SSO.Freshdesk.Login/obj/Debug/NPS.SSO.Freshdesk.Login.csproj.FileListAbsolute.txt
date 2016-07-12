@@ -87,3 +87,5 @@ D:\Freshdesk\NPS.SSO.Freshdesk.Login\bin\System.Web.WebPages.Razor.xml
 D:\Freshdesk\NPS.SSO.Freshdesk.Login\obj\Debug\NPS.SSO.Freshdesk.Login.dll
 D:\Freshdesk\NPS.SSO.Freshdesk.Login\obj\Debug\NPS.SSO.Freshdesk.Login.pdb
 D:\Freshdesk\NPS.SSO.Freshdesk.Login\obj\Debug\NPS.SSO.Freshdesk.Login.csprojResolveAssemblyReference.cache
+D:\Freshdesk\NPS.SSO.Freshdesk.Login\bin\log4net.dll
+D:\Freshdesk\NPS.SSO.Freshdesk.Login\bin\log4net.xml

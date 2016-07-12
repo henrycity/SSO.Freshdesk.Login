@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens;
 
 [assembly: OwinStartup(typeof(NPS.SSO.Freshdesk.Login.Startup))]
-
+[assembly: log4net.Config.XmlConfigurator(ConfigFile = "Web.config", Watch = true)]
 namespace NPS.SSO.Freshdesk.Login
 {
     public class Startup
