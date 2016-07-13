@@ -9,7 +9,7 @@ namespace NPS.SSO.Freshdesk.Login.Tests
 {
     public class TestIdentity : ClaimsIdentity
     {
-        public TestIdentity(IList<Claim> claims) : base(claims)
+        public TestIdentity(IEnumerable<Claim> claims) : base(claims)
         {
         }
     }

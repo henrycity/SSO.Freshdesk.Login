@@ -41,3 +41,5 @@ D:\Freshdesk\NPS.SSO.Freshdesk.Login.Tests\bin\Debug\Castle.Core.dll
 D:\Freshdesk\NPS.SSO.Freshdesk.Login.Tests\bin\Debug\Moq.dll
 D:\Freshdesk\NPS.SSO.Freshdesk.Login.Tests\bin\Debug\Castle.Core.xml
 D:\Freshdesk\NPS.SSO.Freshdesk.Login.Tests\bin\Debug\Moq.xml
+D:\Freshdesk\NPS.SSO.Freshdesk.Login.Tests\bin\Debug\log4net.dll
+D:\Freshdesk\NPS.SSO.Freshdesk.Login.Tests\bin\Debug\log4net.xml

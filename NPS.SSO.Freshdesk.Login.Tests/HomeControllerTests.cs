@@ -23,7 +23,7 @@ namespace NPS.SSO.Freshdesk.Login.Tests
         {
             //Arrange
             var sut = new HomeController();
-            IList<Claim> claimCollection = new List<Claim>
+            IEnumerable<Claim> claimCollection = new List<Claim>
             {
                 new Claim("name", "John Doe"),
                 new Claim("email", "johndoe@yahoo.com"),
