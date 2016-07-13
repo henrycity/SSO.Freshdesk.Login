@@ -42,15 +42,11 @@ namespace NPS.SSO.Freshdesk.Login.Controllers
             try
             {
                 return Redirect(GetFreshdeskSsoUrl());
-            }
+            }     
             catch (Exception ex)
             {
                 logger.Error($"{GetUserName()} gets following error\r\n{ex.Message}");
                 throw;
-            }
-            finally
-            {
-                logger.Info($"{GetUserName()} redirects to Freshdesk successfully.");
             }
         }
 
@@ -74,6 +70,7 @@ namespace NPS.SSO.Freshdesk.Login.Controllers
                 }&phone={HttpUtility.UrlEncode(phone)
                 }&company={HttpUtility.UrlEncode(company)
                 }&hash={hash}";
+            logger.Info($"{name} is redirecting to Freshdesk.");
             return path;
         }
 
@@ -86,7 +83,7 @@ namespace NPS.SSO.Freshdesk.Login.Controllers
             return user.FindFirst(info) != null ? user.FindFirst(info).Value : "";
         }
 
-        private String GetUserName()
+        private string GetUserName()
         {
             return ClaimsPrincipal.Current.FindFirst("name").Value;
         }
