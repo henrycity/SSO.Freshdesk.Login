@@ -13,7 +13,9 @@ namespace NPS.SSO.Freshdesk.Login.Controllers
 {
     public class HomeController : Controller
     {
-        readonly log4net.ILog logger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        readonly log4net.ILog logger =
+            log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         [Authorize]
         public ActionResult Index()
         {
@@ -43,7 +45,7 @@ namespace NPS.SSO.Freshdesk.Login.Controllers
             }
             catch (Exception ex)
             {
-                logger.Error(ex.Message);
+                logger.Error($"{GetUserName()} gets following error\r\n{ex.Message}");
                 throw;
             }
             finally
@@ -54,25 +56,24 @@ namespace NPS.SSO.Freshdesk.Login.Controllers
 
         private string GetFreshdeskSsoUrl()
         {
-            var baseUrl = "https://letsgocena.freshdesk.com";    // Change this to our own Freshdesk portal
+            // Change this to our own Freshdesk portal.
+            var baseUrl = "https://letsgocena.freshdesk.com";
             var currentUser = ClaimsPrincipal.Current;
-            if (currentUser == null)
-            {
-                throw new InvalidCredentialException();
-            }
             var name = GetUserInfo(currentUser, "name");
             var email = GetUserInfo(currentUser, "email");
             var phone = GetUserInfo(currentUser, "phone_number");
             var company = GetUserInfo(currentUser, "companyid");
+            // Use TimeProvider to unit test against the current time.
             var timestamp = TimeProvider.Current.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds.ToString();
-            var secret = "d3dc809dc6c5231897a1b8b9ee4c108c";   // Change this to our portal secret key
+            // Change this to our portal secret key.  
+            var secret = "d3dc809dc6c5231897a1b8b9ee4c108c";
             var hash = GetHash(secret, name, email, timestamp);
             var path = $@"{baseUrl}/login/sso?name={HttpUtility.UrlEncode(name)
-                          }&email={HttpUtility.UrlEncode(email)
-                          }&timestamp={timestamp
-                          }&phone={HttpUtility.UrlEncode(phone)
-                          }&company={HttpUtility.UrlEncode(company)
-                          }&hash={hash}";
+                }&email={HttpUtility.UrlEncode(email)
+                }&timestamp={timestamp
+                }&phone={HttpUtility.UrlEncode(phone)
+                }&company={HttpUtility.UrlEncode(company)
+                }&hash={hash}";
             return path;
         }
 

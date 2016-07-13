@@ -39,7 +39,7 @@ namespace NPS.SSO.Freshdesk.Login.Tests
 
             // Act
             var viewresult = sut.Freshdesk() as RedirectResult;
-            
+
             // Assert
             Assert.That(viewresult.Url, Is.EqualTo(expectedUrl));
         }

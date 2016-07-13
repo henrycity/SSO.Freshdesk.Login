@@ -13,5 +13,4 @@ namespace NPS.SSO.Freshdesk.Login.Tests
         {
         }
     }
-
 }
