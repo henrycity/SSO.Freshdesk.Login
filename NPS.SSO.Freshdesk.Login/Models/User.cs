@@ -7,6 +7,14 @@ namespace NPS.SSO.Freshdesk.Login.Models
 {
     public class User
     {
+        public User(string name, string email, string phone, string company)
+        {
+            Name = name;
+            Email = email;
+            Phone = phone;
+            Company = company;
+        }
+
         public string Name { get; set; }
 
         public string Email { get; set; }

@@ -24,13 +24,7 @@ namespace NPS.SSO.Freshdesk.Login.Controllers
             var email = GetUserInfo(currentUser, "email");
             var phone = GetUserInfo(currentUser, "phone_number");
             var company = GetUserInfo(currentUser, "companyid");
-            var user = new User()
-            {
-                Company = company,
-                Email = email,
-                Name = name,
-                Phone = phone
-            };
+            var user = new User(name, email, phone, company);
             return user;
         }
 
@@ -48,6 +42,4 @@ namespace NPS.SSO.Freshdesk.Login.Controllers
             return ClaimsPrincipal.Current.FindFirst("name").Value;
         }
     }
-
-
 }
