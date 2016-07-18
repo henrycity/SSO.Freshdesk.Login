@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 using System.Security.Authentication;
@@ -8,14 +9,12 @@ using System.Text;
 using System.Web;
 using System.Web.Mvc;
 using NPS.SSO.Freshdesk.Login.Models;
+using NPS.SSO.Freshdesk.Login.Settings;
 
 namespace NPS.SSO.Freshdesk.Login.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : ControllerBase
     {
-        readonly log4net.ILog logger =
-            log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
         [Authorize]
         public ActionResult Index()
         {
@@ -52,40 +51,24 @@ namespace NPS.SSO.Freshdesk.Login.Controllers
 
         private string GetFreshdeskSsoUrl()
         {
-            // Change this to our own Freshdesk portal.
-            var baseUrl = "https://letsgocena.freshdesk.com";
-            var currentUser = ClaimsPrincipal.Current;
-            var name = GetUserInfo(currentUser, "name");
-            var email = GetUserInfo(currentUser, "email");
-            var phone = GetUserInfo(currentUser, "phone_number");
-            var company = GetUserInfo(currentUser, "companyid");
-            // Use TimeProvider to unit test against the current time.
+            var user = GetCurrentUser();
+            var url = GenerateFreshdeskSsoUrl(user);
+            logger.Info($"{user.Name} is redirecting to Freshdesk.");
+            return url;
+        }
+
+        private string GenerateFreshdeskSsoUrl(User user)
+        {
+            var settings = new SSOFreshdeskClientSettings();
             var timestamp = TimeProvider.Current.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds.ToString();
-            // Change this to our portal secret key.  
-            var secret = "d3dc809dc6c5231897a1b8b9ee4c108c";
-            var hash = GetHash(secret, name, email, timestamp);
-            var path = $@"{baseUrl}/login/sso?name={HttpUtility.UrlEncode(name)
-                }&email={HttpUtility.UrlEncode(email)
+            var hash = GetHash(settings.SecretKey, user.Name, user.Email, timestamp);
+            var url = $@"{settings.BaseUrl}/login/sso?name={HttpUtility.UrlEncode(user.Name)
+                }&email={HttpUtility.UrlEncode(user.Email)
                 }&timestamp={timestamp
-                }&phone={HttpUtility.UrlEncode(phone)
-                }&company={HttpUtility.UrlEncode(company)
+                }&phone={HttpUtility.UrlEncode(user.Phone)
+                }&company={HttpUtility.UrlEncode(user.Company)
                 }&hash={hash}";
-            logger.Info($"{name} is redirecting to Freshdesk.");
-            return path;
-        }
-
-        private string GetUserInfo(ClaimsPrincipal user, string info)
-        {
-            if (user.FindFirst(info) == null || string.IsNullOrEmpty(user.FindFirst(info).Value))
-            {
-                logger.Warn($"{info} of {GetUserName()} is empty.");
-            }
-            return user.FindFirst(info) != null ? user.FindFirst(info).Value : "";
-        }
-
-        private string GetUserName()
-        {
-            return ClaimsPrincipal.Current.FindFirst("name").Value;
+            return url;
         }
 
         private string GetHash(string secret, string name, string email, string timems)
